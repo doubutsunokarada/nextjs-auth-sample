@@ -4,7 +4,7 @@ services:
     container_name: nextjs-auth-sample-mysql
     build: ./mysql
     volumes:
-      - mysql_volume:/var/lib/mysql
+      - sample_mysql_volume:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=database
@@ -12,4 +12,4 @@ services:
     ports:
       - 13306:3306
 volumes:
-  mysql_volume:
+  sample_mysql_volume:
