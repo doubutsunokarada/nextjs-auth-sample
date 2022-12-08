@@ -1,1 +1,1 @@
-# next-authjs-auth-sample
+# nextjs-auth-auth-sample
