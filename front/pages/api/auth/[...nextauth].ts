@@ -1,5 +1,5 @@
 import NextAuth from "next-auth/next";
-import { Awaitable, NextAuthOptions, User } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 const options: NextAuthOptions = {

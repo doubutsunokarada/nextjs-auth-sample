@@ -1,10 +1,13 @@
+import { RouteRounded } from "@mui/icons-material";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import styles from "../styles/Home.module.css";
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   if (session) {
     return (
       <div className={styles.container}>

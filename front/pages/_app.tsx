@@ -6,9 +6,9 @@ import { Session } from "next-auth";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 import { theme, darkTheme } from "../src/theme";
 import createEmotionCache from "../src/createEmotionCache";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import React, { useEffect } from "react";
+import React from "react";
 import { useMediaQuery } from "@mui/material";
 
 const clientSideEmotionCache = createEmotionCache();
@@ -22,7 +22,7 @@ export default function App({
   emotionCache,
 }: AppProps<{ session: Session }> & MyAppProps) {
   emotionCache = clientSideEmotionCache;
-  const isDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const isDark = useMediaQuery("(prefers-color-scheme: dark)");
 
   return (
     <CacheProvider value={emotionCache}>

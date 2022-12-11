@@ -8,7 +8,6 @@ import {
   Container,
   FormControl,
   FormControlLabel,
-  Grid,
   IconButton,
   InputAdornment,
   InputLabel,
@@ -22,7 +21,6 @@ import {
   getProviders,
   LiteralUnion,
   signIn,
-  getSession,
 } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -32,6 +30,16 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { getToken } from "next-auth/jwt";
 import { BuiltInProviderType } from "next-auth/providers";
 import { GetServerSideProps } from "next/types";
+import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+const schema = z.object({
+  email: z.string().min(1).email(),
+  password: z.string().min(1).max(32),
+});
+
+type SignInInputs = z.infer<typeof schema>;
 
 export default function SignIn({
   providers,
@@ -44,29 +52,27 @@ export default function SignIn({
   loginError: string;
 }) {
   const router = useRouter();
-  const [values, setValues] = React.useState({
-    email: "cred_test@example.com",
-    password: "password",
-    showPassword: false,
-    rememberMe: false,
+  const [rememberMe, setRememberMe] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
+  const { control, handleSubmit } = useForm<SignInInputs>({
+    defaultValues: {
+      email: "cred_test@example.com",
+      password: "password",
+    },
+    resolver: zodResolver(schema),
   });
-
   const [showAlert, setShowAlert] = React.useState(false);
 
   const handleRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValues({ ...values, rememberMe: !values.rememberMe });
+    event.preventDefault();
+    setRememberMe(!rememberMe);
   };
-
-  const handleChange =
-    (prop: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      setValues({ ...values, [prop]: event.target.value });
-    };
 
   const handleClickShowPassword = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
-    setValues({ ...values, showPassword: !values.showPassword });
+    setShowPassword(!showPassword);
   };
 
   const handleMouseDownPassword = (
@@ -75,12 +81,11 @@ export default function SignIn({
     event.preventDefault();
   };
 
-  const handleLoginUser = async (
-    event: React.MouseEvent<HTMLButtonElement>
+  const onSubmit: SubmitHandler<SignInInputs> = async (
+    values: SignInInputs
   ) => {
-    event.preventDefault();
     await signIn("credentials", {
-      redirect: true,
+      redirect: false,
       email: values.email,
       password: values.password,
     }).then((res) => {
@@ -126,45 +131,64 @@ export default function SignIn({
               </Alert>
             </Typography>
           )}
-          <Box component={"form"} noValidate sx={{ mt: 1 }}>
-            <TextField
-              variant="outlined"
-              required
-              tabIndex={1}
-              fullWidth
-              onChange={handleChange("email")}
-              value={values.email}
-              id="email"
-              label="Email"
+          <Box
+            component={"form"}
+            noValidate
+            sx={{ mt: 1 }}
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <Controller
               name="email"
-              autoComplete="email"
-              sx={{ mb: 3 }}
+              control={control}
+              render={({ field, fieldState }) => {
+                return (
+                  <TextField
+                    {...field}
+                    variant="outlined"
+                    type="text"
+                    tabIndex={1}
+                    fullWidth
+                    label="Email"
+                    autoComplete="email"
+                    sx={{ mb: 3 }}
+                    error={fieldState.error !== undefined}
+                    helperText={fieldState.error?.message}
+                  />
+                );
+              }}
             />
             <FormControl variant="outlined" fullWidth>
               <InputLabel htmlFor="outlined-adornment-password">
                 Password
               </InputLabel>
-              <OutlinedInput
-                tabIndex={2}
-                required
-                label="Password"
-                id="outlined-adornment-password"
-                type={values.showPassword ? "text" : "password"}
-                value={values.password}
-                onChange={handleChange("password")}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      edge="end"
-                      size="large"
-                    >
-                      {values.showPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                }
+              <Controller
+                name="password"
+                control={control}
+                render={({ field, fieldState }) => {
+                  return (
+                    <OutlinedInput
+                      {...field}
+                      tabIndex={2}
+                      label="Password"
+                      id="outlined-adornment-password"
+                      type={showPassword ? "text" : "password"}
+                      error={fieldState.error !== undefined}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                            size="large"
+                          >
+                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                    />
+                  );
+                }}
               />
             </FormControl>
             <FormControlLabel
@@ -172,22 +196,18 @@ export default function SignIn({
                 <Checkbox
                   color="primary"
                   onChange={handleRememberMe}
-                  value={values.rememberMe}
+                  value={rememberMe}
                 />
               }
               label={"Remember me"}
             />
             <Button
-              type="button"
+              type="submit"
               tabIndex={3}
               fullWidth
               size="large"
               variant="contained"
               color="primary"
-              disabled={
-                values.email.length === 0 || values.password.length === 0
-              }
-              onClick={handleLoginUser}
             >
               Sign In
             </Button>
