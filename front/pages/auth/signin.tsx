@@ -18,13 +18,15 @@ import {
 import { blue } from "@mui/material/colors";
 import {
   ClientSafeProvider,
+  getCsrfToken,
   getProviders,
   LiteralUnion,
   signIn,
+  useSession,
 } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect } from "react";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { BuiltInProviderType } from "next-auth/providers";
@@ -33,10 +35,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { GetServerSideProps, NextComponentType, NextPage } from "next";
 import { getToken } from "next-auth/jwt";
+import { render } from "react-dom";
 
 const schema = z.object({
   email: z.string().min(1).email(),
   password: z.string().min(1).max(32),
+  csrfToken: z.string(),
 });
 
 type SignInProps = {
@@ -45,6 +49,7 @@ type SignInProps = {
     ClientSafeProvider
   > | null>;
   loginError: string;
+  csrfToken: string;
 };
 
 type SignInInputs = z.infer<typeof schema>;
@@ -57,10 +62,12 @@ const SignIn: NextPage<SignInProps> = (props: SignInProps) => {
     defaultValues: {
       email: "cred_test@example.com",
       password: "password",
+      csrfToken: props.csrfToken,
     },
     resolver: zodResolver(schema),
   });
   const [showAlert, setShowAlert] = React.useState(false);
+  const { status } = useSession();
 
   const handleRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
@@ -95,6 +102,12 @@ const SignIn: NextPage<SignInProps> = (props: SignInProps) => {
       }
     });
   };
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
 
   return (
     <>
@@ -136,6 +149,14 @@ const SignIn: NextPage<SignInProps> = (props: SignInProps) => {
             sx={{ mt: 1 }}
             onSubmit={handleSubmit(onSubmit)}
           >
+            <Controller
+              control={control}
+              name="csrfToken"
+              defaultValue={props.csrfToken}
+              render={({ field, fieldState }) => {
+                return <TextField {...field} type="hidden" value={field.value} />;
+              }}
+            />
             <Controller
               name="email"
               control={control}
@@ -226,6 +247,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const props = {
       providers: await getProviders(),
       loginError: query.error ?? "",
+      csrfToken: await getCsrfToken(),
     };
     return {
       props: props,
@@ -234,6 +256,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const props = {
       providers: await getProviders(),
       loginError: query.error ?? "",
+      csrfToken: await getCsrfToken(),
     };
     return {
       props: props,

@@ -1,9 +1,6 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import {
-  ClientSafeProvider,
-  getProviders,
-  LiteralUnion,
   SessionProvider,
 } from "next-auth/react";
 import Head from "next/head";
@@ -16,28 +13,14 @@ import CssBaseline from "@mui/material/CssBaseline";
 import React from "react";
 import { useMediaQuery } from "@mui/material";
 import AuthenticationMiddleware from "../middleware/AuthenticationMiddleware";
-import { GetServerSideProps } from "next";
-import { getToken } from "next-auth/jwt";
-import { BuiltInProviderType } from "next-auth/providers";
 
 const clientSideEmotionCache = createEmotionCache();
 
 interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache;
-  providers: Promise<Record<
-    LiteralUnion<BuiltInProviderType, string>,
-    ClientSafeProvider
-  > | null>;
-  loginError: string;
 }
 
-export default function App({
-  Component,
-  pageProps,
-  emotionCache,
-  providers,
-  loginError,
-}: AppProps<{ session: Session }> & MyAppProps) {
+const App = ({ Component, pageProps, emotionCache }: MyAppProps) => {
   emotionCache = clientSideEmotionCache;
   const isDark = useMediaQuery("(prefers-color-scheme: dark)");
 
@@ -56,4 +39,6 @@ export default function App({
       </SessionProvider>
     </CacheProvider>
   );
-}
+};
+
+export default App;

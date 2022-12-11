@@ -1,6 +1,4 @@
-import {
-  useSession,
-} from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import React from "react";
 
@@ -11,6 +9,7 @@ export default function AuthenticationMiddleware({
 }): any {
   const { status } = useSession();
   const router = useRouter();
+  console.log(status);
   React.useEffect(() => {
     if (status === "unauthenticated") {
       if (router.pathname !== "/auth/signin") {
@@ -20,4 +19,5 @@ export default function AuthenticationMiddleware({
   }, [router, status]);
 
   if (status === "authenticated") return children;
+  if (status === "unauthenticated" && router.pathname === "/auth/signin") return children;
 }

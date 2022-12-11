@@ -32,8 +32,11 @@ const options: NextAuthOptions = {
       token.userRole = "regular";
       return token;
     },
+    session: ({ session }) => {
+      return session;
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-export default NextAuth(options)
+export default NextAuth(options);
