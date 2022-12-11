@@ -49,7 +49,7 @@ export default function App({
       <SessionProvider session={pageProps.session} refetchInterval={0}>
         <ThemeProvider theme={isDark ? darkTheme : theme}>
           <CssBaseline />
-          <AuthenticationMiddleware providers={providers} loginError={loginError}>
+          <AuthenticationMiddleware>
             <Component {...pageProps} />
           </AuthenticationMiddleware>
         </ThemeProvider>
@@ -57,20 +57,3 @@ export default function App({
     </CacheProvider>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { query, req, res } = context;
-
-  try {
-    const secret = process.env.NEXTAUTH_SECRET;
-    const token = await getToken({ req, secret });
-
-    return {
-      props: { providers: await getProviders(), loginError: query.error ?? "" },
-    };
-  } catch (e) {
-    return {
-      props: { providers: await getProviders(), loginError: query.error ?? "" },
-    };
-  }
-};

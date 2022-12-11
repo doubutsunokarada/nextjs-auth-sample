@@ -16,7 +16,12 @@ import {
   Typography,
 } from "@mui/material";
 import { blue } from "@mui/material/colors";
-import { ClientSafeProvider, LiteralUnion, signIn } from "next-auth/react";
+import {
+  ClientSafeProvider,
+  getProviders,
+  LiteralUnion,
+  signIn,
+} from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
@@ -26,24 +31,25 @@ import { BuiltInProviderType } from "next-auth/providers";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { GetServerSideProps, NextComponentType, NextPage } from "next";
+import { getToken } from "next-auth/jwt";
 
 const schema = z.object({
   email: z.string().min(1).email(),
   password: z.string().min(1).max(32),
 });
 
-type SignInInputs = z.infer<typeof schema>;
-
-export default function SignIn({
-  providers,
-  loginError,
-}: {
+type SignInProps = {
   providers: Promise<Record<
     LiteralUnion<BuiltInProviderType, string>,
     ClientSafeProvider
   > | null>;
   loginError: string;
-}) {
+};
+
+type SignInInputs = z.infer<typeof schema>;
+
+const SignIn: NextPage<SignInProps> = (props: SignInProps) => {
   const router = useRouter();
   const [rememberMe, setRememberMe] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
@@ -85,7 +91,7 @@ export default function SignIn({
       if (res?.error) {
         setShowAlert(true);
       } else {
-        router.replace("/");
+        router.push("/");
       }
     });
   };
@@ -209,4 +215,30 @@ export default function SignIn({
       </Container>
     </>
   );
-}
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { query, req, res } = context;
+
+  try {
+    const secret = process.env.NEXTAUTH_SECRET;
+    const token = await getToken({ req, secret });
+    const props = {
+      providers: await getProviders(),
+      loginError: query.error ?? "",
+    };
+    return {
+      props: props,
+    };
+  } catch (e) {
+    const props = {
+      providers: await getProviders(),
+      loginError: query.error ?? "",
+    };
+    return {
+      props: props,
+    };
+  }
+};
+
+export default SignIn;
