@@ -16,20 +16,13 @@ import {
   Typography,
 } from "@mui/material";
 import { blue } from "@mui/material/colors";
-import {
-  ClientSafeProvider,
-  getProviders,
-  LiteralUnion,
-  signIn,
-} from "next-auth/react";
+import { ClientSafeProvider, LiteralUnion, signIn } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { getToken } from "next-auth/jwt";
 import { BuiltInProviderType } from "next-auth/providers";
-import { GetServerSideProps } from "next/types";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -92,7 +85,7 @@ export default function SignIn({
       if (res?.error) {
         setShowAlert(true);
       } else {
-        router.push("/");
+        router.replace("/");
       }
     });
   };
@@ -217,20 +210,3 @@ export default function SignIn({
     </>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { query, req, res } = context;
-
-  try {
-    const secret = process.env.NEXTAUTH_SECRET;
-    const token = await getToken({ req, secret });
-
-    return {
-      props: { providers: await getProviders(), loginError: query.error ?? "" },
-    };
-  } catch (e) {
-    return {
-      props: { providers: await getProviders(), loginError: query.error ?? "" },
-    };
-  }
-};
