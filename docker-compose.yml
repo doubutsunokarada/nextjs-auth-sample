@@ -4,7 +4,7 @@ services:
     build: ./mysql
     volumes:
       - mysql_volume:/var/lib/mysql
-    container_name: admin-template-mysql
+    container_name: mysql
     environment:
       - MYSQL_ROOT_HOST=%
       - MYSQL_ROOT_USER=root
