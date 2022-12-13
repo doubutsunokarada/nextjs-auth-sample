@@ -33,9 +33,8 @@ import { BuiltInProviderType } from "next-auth/providers";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { GetServerSideProps, NextComponentType, NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import { getToken } from "next-auth/jwt";
-import { render } from "react-dom";
 
 const schema = z.object({
   email: z.string().min(1).email(),
@@ -94,9 +93,14 @@ const SignIn: NextPage<SignInProps> = (props: SignInProps) => {
       redirect: false,
       email: values.email,
       password: values.password,
+      callbackUrl: `${window.location.origin}/`,
     }).then((res) => {
-      if (res?.error) {
-        setShowAlert(true);
+      if (res?.error !== null) {
+        if (res?.status === 401) {
+          setShowAlert(true);
+        } else {
+          setShowAlert(true);
+        }
       } else {
         router.push("/");
       }
@@ -154,7 +158,9 @@ const SignIn: NextPage<SignInProps> = (props: SignInProps) => {
               name="csrfToken"
               defaultValue={props.csrfToken}
               render={({ field, fieldState }) => {
-                return <TextField {...field} type="hidden" value={field.value} />;
+                return (
+                  <TextField {...field} type="hidden" value={field.value} />
+                );
               }}
             />
             <Controller
