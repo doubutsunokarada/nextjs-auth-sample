@@ -2,7 +2,7 @@
 
 ## Install
 
-1. `front/.env`の作成<br>
+1. `next/.env`の作成<br>
     ex.
     ```
     # Environment variables declared in this file are automatically made available to Prisma.
