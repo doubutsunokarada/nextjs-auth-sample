@@ -2,7 +2,7 @@
 
 ## Description
 
-    Next.js(TypeScript) + NextAuth.js + Prismaを用いたログイン機能のサンプル
+    Next.js(TypeScript) + NextAuth.js + Prisma(MySQL)を用いたログイン機能のサンプル
 
 ## Install
 
