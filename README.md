@@ -21,7 +21,7 @@
 1. MySQLコンテナのビルド及び実行<br>
     `$ docker-compose up --build`<br>
 
-1. フロントエンドアプリケーションの準備<br>
+1. Next.js & Prismaの準備<br>
     ```
     $ cd ./next
     ```
@@ -48,7 +48,7 @@
         The seed command has been executed.
         ```
 
-1. フロントエンドアプリケーションの実行<br>
+1. Next.jsの実行<br>
     ```
     $ yarn dev
     ```
