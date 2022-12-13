@@ -1,5 +1,9 @@
 # nextjs-auth-sample
 
+## Description
+
+Next.js(TypeScript) + NextAuth.js + Prismaを用いたログイン機能のサンプル
+
 ## Install
 
 1. `next/.env`の作成<br>
