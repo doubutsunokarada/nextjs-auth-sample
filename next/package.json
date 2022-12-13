@@ -1,5 +1,5 @@
 {
-  "name": "front",
+  "name": "nextjs-auth-sample",
   "version": "0.1.0",
   "private": true,
   "scripts": {
