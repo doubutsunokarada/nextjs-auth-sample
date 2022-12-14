@@ -2,9 +2,16 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
+import { unstable_getServerSession } from "next-auth/next";
+import { options } from "./api/auth/[...nextauth]";
+import { Session } from "next-auth";
 import { getSession } from "next-auth/react";
 
-export default function Home() {
+type PropsType = {
+  session: Session;
+};
+
+export default function Home({ session }: PropsType) {
   return (
     <div className={styles.container}>
       <Head>

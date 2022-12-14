@@ -46,7 +46,7 @@ model User {
   name          String?
   email         String?   @unique
   emailVerified DateTime? @map("email_verified")
-  password      String? @db.VarChar(255)
+  password      String?   @db.VarChar(255)
   image         String?
   accounts      Account[]
   sessions      Session[]

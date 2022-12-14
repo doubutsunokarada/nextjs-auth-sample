@@ -20,6 +20,7 @@ import {
   ClientSafeProvider,
   getCsrfToken,
   getProviders,
+  getSession,
   LiteralUnion,
   signIn,
   useSession,
@@ -93,7 +94,6 @@ const SignIn: NextPage<SignInProps> = (props: SignInProps) => {
       redirect: false,
       email: values.email,
       password: values.password,
-      callbackUrl: `${window.location.origin}/`,
     }).then((res) => {
       if (res?.error !== null) {
         if (res?.status === 401) {
@@ -107,11 +107,11 @@ const SignIn: NextPage<SignInProps> = (props: SignInProps) => {
     });
   };
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/");
-    }
-  }, [status, router]);
+  // useEffect(() => {
+  //   if (status === "authenticated") {
+  //     router.push("/");
+  //   }
+  // }, [status, router]);
 
   return (
     <>
@@ -244,12 +244,22 @@ const SignIn: NextPage<SignInProps> = (props: SignInProps) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { query, req, res } = context;
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { query, req, res } = ctx;
 
   try {
     const secret = process.env.NEXTAUTH_SECRET;
     const token = await getToken({ req, secret });
+    const session = await getSession(ctx);
+    if (session) {
+      return {
+        redirect: {
+          destination: "/",
+          permanent: false,
+        },
+      };
+    }
+
     const props = {
       providers: await getProviders(),
       loginError: query.error ?? "",

@@ -3,6 +3,7 @@ import { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "../../../lib/prismadb";
+import bcrypt from "bcrypt";
 
 export const options: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -13,12 +14,26 @@ export const options: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials) => {
-        if (
-          credentials?.email === "cred_test@example.com" &&
-          credentials?.password === "password"
-        ) {
-          return { id: "1", name: "Test User", email: "cred_test@example.com" };
+      authorize: async (credentials, req) => {
+        const user = await prisma.user.findUnique({
+          where: {
+            email: credentials?.email,
+          },
+        });
+
+        if (user !== null) {
+          if (
+            typeof credentials?.password === "string" &&
+            typeof user.password === "string"
+          ) {
+            const compared = await bcrypt.compare(
+              credentials?.password,
+              user.password
+            );
+            if (compared) {
+              return { id: user.id, name: user.name, email: user.email };
+            }
+          }
         }
         return null;
       },
@@ -26,18 +41,6 @@ export const options: NextAuthOptions = {
   ],
   pages: {
     signIn: "/auth/signin",
-  },
-  callbacks: {
-    signIn: async () => {
-      return true;
-    },
-    jwt: async ({ token }) => {
-      token.userRole = "regular";
-      return token;
-    },
-    session: ({ session }) => {
-      return session;
-    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
